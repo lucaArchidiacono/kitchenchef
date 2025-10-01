@@ -1,0 +1,63 @@
+---
+import SwipeDeck from "../react/SwipeDeck";
+import "../styles/globals.css";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recipe Swipe</title>
+  </head>
+  <body class="min-h-screen bg-gray-50 text-gray-900">
+    <main class="mx-auto max-w-xl p-4">
+      <h1 class="text-2xl font-bold mb-4">Recipe Swipe</h1>
+      <p class="mb-4 text-sm text-gray-600">Swipe right if you like it, left to skip. After up to 10 swipes, you may get a suggestion to cook the last liked recipe.</p>
+      <section class="mb-6">
+        <form id="url-form" class="flex gap-2">
+          <input id="url-input" placeholder="Paste recipe/blog URL" class="flex-1 border rounded px-3 py-2" />
+          <button type="submit" class="px-3 py-2 bg-black text-white rounded">Add</button>
+        </form>
+        <ul id="url-list" class="mt-2 space-y-1 text-sm"></ul>
+      </section>
+      <section>
+        <SwipeDeck client:only="react" />
+      </section>
+    </main>
+    <script>
+      const KEY = "userUrls";
+      const form = document.getElementById("url-form");
+      const input = document.getElementById("url-input");
+      const list = document.getElementById("url-list");
+      function load() {
+        const arr = JSON.parse(localStorage.getItem(KEY) || "[]");
+        list.innerHTML = "";
+        arr.forEach((u, idx) => {
+          const li = document.createElement("li");
+          li.className = "flex items-center justify-between border rounded px-2 py-1";
+          const a = document.createElement("a");
+          a.href = u; a.textContent = u; a.target = "_blank"; a.rel = "noreferrer";
+          const del = document.createElement("button");
+          del.textContent = "Remove"; del.className = "text-red-600";
+          del.onclick = () => {
+            const arr2 = JSON.parse(localStorage.getItem(KEY) || "[]");
+            arr2.splice(idx, 1);
+            localStorage.setItem(KEY, JSON.stringify(arr2));
+            load();
+          };
+          li.appendChild(a); li.appendChild(del); list.appendChild(li);
+        });
+      }
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        try { new URL(input.value); } catch { return; }
+        const arr = JSON.parse(localStorage.getItem(KEY) || "[]");
+        arr.push(input.value);
+        localStorage.setItem(KEY, JSON.stringify(arr));
+        input.value = ""; load();
+      });
+      load();
+    </script>
+  </body>
+  </html>
+
