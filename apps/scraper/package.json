@@ -1,0 +1,21 @@
+{
+  "name": "@apps/scraper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "scrape:fooby": "bun src/sources/fooby.ts",
+    "scrape:url": "bun src/scrape-url.ts"
+  },
+  "dependencies": {
+    "@repo/db": "workspace:*",
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
+

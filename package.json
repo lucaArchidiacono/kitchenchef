@@ -1,0 +1,21 @@
+{
+  "name": "recipe-swipe-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter @apps/web run dev",
+    "build": "bun --filter @apps/web run build",
+    "preview": "bun --filter @apps/web run preview",
+    "db:generate": "bun --filter @repo/db run db:generate",
+    "db:push": "bun --filter @repo/db run db:push",
+    "scrape:fooby": "bun --filter @apps/scraper run scrape:fooby",
+    "scrape:url": "bun --filter @apps/scraper run scrape:url"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
+
