@@ -10,7 +10,18 @@
   },
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@aws-sdk/client-s3": "^3.665.0",
     "cheerio": "^1.0.0",
+    "metascraper": "^5.46.9",
+    "metascraper-author": "^5.45.30",
+    "metascraper-date": "^5.45.30",
+    "metascraper-description": "^5.45.30",
+    "metascraper-image": "^5.45.30",
+    "metascraper-lang": "^5.45.30",
+    "metascraper-logo": "^5.45.30",
+    "metascraper-publisher": "^5.45.30",
+    "metascraper-title": "^5.45.30",
+    "metascraper-url": "^5.45.30",
     "node-fetch": "^3.3.2",
     "zod": "^3.23.8"
   },

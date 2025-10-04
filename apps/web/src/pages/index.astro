@@ -14,9 +14,16 @@ import "../styles/globals.css";
       <h1 class="text-2xl font-bold mb-4">Recipe Swipe</h1>
       <p class="mb-4 text-sm text-gray-600">Swipe right if you like it, left to skip. After up to 10 swipes, you may get a suggestion to cook the last liked recipe.</p>
       <section class="mb-6">
-        <form id="url-form" class="flex gap-2">
-          <input id="url-input" placeholder="Paste recipe/blog URL" class="flex-1 border rounded px-3 py-2" />
-          <button type="submit" class="px-3 py-2 bg-black text-white rounded">Add</button>
+        <form id="url-form" class="flex flex-col gap-2">
+          <div class="flex gap-2">
+            <input id="url-input" placeholder="Paste recipe/blog URL" class="flex-1 border rounded px-3 py-2" />
+            <select id="reaction-input" class="border rounded px-2 py-2">
+              <option value="like">Like</option>
+              <option value="dislike">Dislike</option>
+            </select>
+          </div>
+          <input id="comment-input" placeholder="Optional comment" class="border rounded px-3 py-2" />
+          <button type="submit" class="px-3 py-2 bg-black text-white rounded self-start">Add</button>
         </form>
         <ul id="url-list" class="mt-2 space-y-1 text-sm"></ul>
       </section>
@@ -25,18 +32,41 @@ import "../styles/globals.css";
       </section>
     </main>
     <script>
-      const KEY = "userUrls";
+      const KEY = "userSourcesV1";
+      const CLIENT_KEY = "clientIdV1";
       const form = document.getElementById("url-form");
       const input = document.getElementById("url-input");
+      const reaction = document.getElementById("reaction-input");
+      const comment = document.getElementById("comment-input");
       const list = document.getElementById("url-list");
+      function getClientId() {
+        let id = localStorage.getItem(CLIENT_KEY);
+        if (!id) {
+          id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+          localStorage.setItem(CLIENT_KEY, id);
+        }
+        return id;
+      }
+      async function syncSource(item) {
+        try {
+          await fetch('/api/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: item.url, reaction: item.reaction, comment: item.comment, clientId: getClientId() })
+          });
+        } catch {}
+      }
       function load() {
         const arr = JSON.parse(localStorage.getItem(KEY) || "[]");
         list.innerHTML = "";
-        arr.forEach((u, idx) => {
+        arr.forEach((item, idx) => {
           const li = document.createElement("li");
           li.className = "flex items-center justify-between border rounded px-2 py-1";
           const a = document.createElement("a");
-          a.href = u; a.textContent = u; a.target = "_blank"; a.rel = "noreferrer";
+          a.href = item.url; a.textContent = item.url; a.target = "_blank"; a.rel = "noreferrer";
+          const meta = document.createElement('span');
+          meta.className = 'text-xs text-gray-500 ml-2';
+          meta.textContent = `${item.reaction}${item.comment ? ' · ' + item.comment : ''}`;
           const del = document.createElement("button");
           del.textContent = "Remove"; del.className = "text-red-600";
           del.onclick = () => {
@@ -45,17 +75,31 @@ import "../styles/globals.css";
             localStorage.setItem(KEY, JSON.stringify(arr2));
             load();
           };
-          li.appendChild(a); li.appendChild(del); list.appendChild(li);
+          li.appendChild(a); li.appendChild(meta); li.appendChild(del); list.appendChild(li);
         });
       }
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        try { new URL(input.value); } catch { return; }
+        try { new URL((input as HTMLInputElement).value); } catch { return; }
         const arr = JSON.parse(localStorage.getItem(KEY) || "[]");
-        arr.push(input.value);
+        const item = { url: (input as HTMLInputElement).value, reaction: (reaction as HTMLSelectElement).value, comment: (comment as HTMLInputElement).value || null };
+        arr.push(item);
         localStorage.setItem(KEY, JSON.stringify(arr));
-        input.value = ""; load();
+        syncSource(item);
+        (input as HTMLInputElement).value = ""; (comment as HTMLInputElement).value = ""; load();
       });
+      // Migrate old storage if present
+      try {
+        const legacy = JSON.parse(localStorage.getItem('userUrls') || '[]');
+        if (Array.isArray(legacy) && legacy.length > 0 && !localStorage.getItem(KEY)) {
+          const migrated = legacy.map((u) => ({ url: u, reaction: 'like', comment: null }));
+          localStorage.setItem(KEY, JSON.stringify(migrated));
+          migrated.forEach(syncSource);
+        }
+      } catch {}
+
+      // On load, ensure all items are synced
+      (JSON.parse(localStorage.getItem(KEY) || '[]')).forEach(syncSource);
       load();
     </script>
   </body>

@@ -1,5 +1,4 @@
 import type { APIRoute } from "astro";
-import { getDb, schema } from "@repo/db";
 import { generateText } from "@vercel/ai";
 
 // Returns a re-ranked set of recipe IDs for a feed, based on local likes and URLs
