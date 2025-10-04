@@ -33,7 +33,8 @@ function useSwipeQueue() {
     const shouldCheck = Math.random() < 0.3 || swipeCount >= 9 || (direction === "right" && likes.length >= 1);
     if (shouldCheck && direction === "right") {
       try {
-        const urls = JSON.parse(localStorage.getItem("userUrls") || "[]");
+        const userSources = JSON.parse(localStorage.getItem("userSourcesV1") || "[]");
+        const urls = Array.isArray(userSources) ? userSources.map((s: any) => s.url) : [];
         const resp = await fetch("/api/match", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

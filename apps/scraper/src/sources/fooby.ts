@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
-import { scrapeRecipePage, upsertRecipe } from "../index";
+import { scrapeRecipePage, upsertRecipe, scrapeAndStoreSource } from "../index";
 
 async function discoverFoobyRecipeUrls(): Promise<string[]> {
   const startUrls = [
@@ -34,6 +34,8 @@ async function main() {
   let count = 0;
   for (const url of urls) {
     try {
+      // Store raw HTML & metadata for the URL
+      await scrapeAndStoreSource(url);
       const normalized = await scrapeRecipePage(url);
       await upsertRecipe(normalized);
       count++;
